@@ -1,0 +1,61 @@
+Python Automatic Differentiation and (Co)variance Calculation
+
+pyderiv keeps the first and second derivatives with respect to all related variables in a Variable object. Variable objects are created with deriv.varying or noise.noise. They can then be manipulated like normal numbers, except for that when using mathematical functions, the replacements in deriv must be used (deriv.sin). A 'derivative' can be taken of a Variable object with deriv.d and the numerical value of any Variable object can be obtained with deriv.v. For noise, noise.E, noise.cov, noise.var, and noise.cov_matrix are easy to use.
+
+Example (section of README.py)
+
+r = (x * x + y * y) ** .5
+
+print "r", deriv.v(r)
+print "dr/dx", deriv.v(deriv.d(r, x))
+print "dr/dy", deriv.v(deriv.d(r, y))
+print "d2r/dx2", deriv.v(deriv.d(r, x, x))
+print "d2r/dy2", deriv.v(deriv.d(r, y, y))
+print "d2r/dx/dy", deriv.v(deriv.d(r, x, y))
+print "d2r/dy/dx", deriv.v(deriv.d(r, y, x))
+
+print
+print "---"
+print
+
+x = -1 + noise.noise(3)
+y = 2 + noise.noise(7)
+
+r = x, y, x + y, x - y, x / y, x * x, x * y, y * y
+
+print ' '.join("%7.03f" % noise.E(x) for x in r), "E"
+print ' '.join("%7.03f" % noise.var(x) for x in r), "variance"
+print
+print "covariance matrix:"
+
+for row in noise.cov_matrix(r):
+    for col in row:
+        print "%7.03f" % col,
+    print
+
+Result
+
+r 8.60232526704
+dr/dx 0.581238193719
+dr/dy -0.813733471207
+d2r/dx2 0.0769747878169
+d2r/dy2 0.039272850927
+d2r/dx/dy 0.0549819912978
+d2r/dy/dx 0.0549819912978
+
+---
+
+ -1.000   2.000   1.000  -3.000  -1.375   4.000  -2.000  11.000 E
+  3.000   7.000  10.000  10.000   4.031  30.000  40.000 210.000 variance
+
+covariance matrix:
+  3.000  -0.000   3.000   3.000   1.500  -6.000   6.000   0.000
+ -0.000   7.000   7.000  -7.000   1.750  -0.000  -7.000  28.000
+  3.000   7.000  10.000  -4.000   3.250  -6.000  -1.000  28.000
+  3.000  -7.000  -4.000  10.000  -0.250  -6.000  13.000 -28.000
+  1.500   1.750   3.250  -0.250   4.031  -3.000  -4.000  -5.250
+ -6.000  -0.000  -6.000  -6.000  -3.000  30.000 -12.000   0.000
+  6.000  -7.000  -1.000  13.000  -4.000 -12.000  40.000 -28.000
+  0.000  28.000  28.000 -28.000  -5.250   0.000 -28.000 210.000
+
+
